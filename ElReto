@@ -21,17 +21,18 @@ def capturar_foto():
     cap.release()
     return frame
 
-def enviar_a_api_deteccion(imagen_path, api_url, api_key=None):
-    """Envía la imagen a una API de detección de objetos."""
+def enviar_a_faceplusplus(imagen_path, api_url, api_key, api_secret):
+    """Envía la imagen a la API de Face++."""
     try:
         with open(imagen_path, 'rb') as imagen_file:
-            files = {'upload_file': ('image.jpg', imagen_file, 'image/jpeg')}
-            headers = {}
-            if api_key:
-                headers['Authorization'] = f'Bearer {api_key}' # Ejemplo de autenticación
+            files = {'image_file': imagen_file}
+            data = {
+                'api_key': api_key,
+                'api_secret': api_secret
+            }
 
-            response = requests.post(api_url, files=files, headers=headers)
-            response.raise_for_status()  # Lanza una excepción para códigos de error HTTP
+            response = requests.post(api_url, data=data, files=files)
+            response.raise_for_status()
             return response.json()
     except requests.exceptions.RequestException as e:
         print(f"Error al comunicarse con la API: {e}")
@@ -41,14 +42,14 @@ def enviar_a_api_deteccion(imagen_path, api_url, api_key=None):
         return None
 
 def procesar_respuesta(response_json):
-    """Procesa la respuesta JSON de la API para detectar personas."""
-    if response_json and 'predictions' in response_json:
-        for prediction in response_json['predictions']:
-            if prediction['label'] == 'person' and prediction['confidence'] > 0.5: # Ajusta la confianza según sea necesario
-                print("¡Se detectó una persona!")
-                return True
-        print("No se detectó ninguna persona con alta confianza.")
-        return False
+    """Procesa la respuesta JSON de Face++ para detectar rostros."""
+    if response_json and 'faces' in response_json:
+        if len(response_json['faces']) > 0:
+            print(f"¡Se detectó {len(response_json['faces'])} rostro(s) en la imagen!")
+            return True
+        else:
+            print("No se detectaron rostros.")
+            return False
     else:
         print("La respuesta de la API no tiene el formato esperado.")
         return False
@@ -61,15 +62,15 @@ if __name__ == "__main__":
         cv2.imwrite(nombre_archivo, frame)
         print(f"Foto guardada como {nombre_archivo}")
 
-        # *** Aquí debes configurar la URL de la API y la clave de API (si es necesaria) ***
-        api_url = "apiurl"
-        api_key = "apikey"
+        # Configura la URL y tus credenciales de Face++
+        api_url = "face++"
+        api_key = "APIKey"
+        api_secret = "APISecret"
 
-        if api_url:
-            resultado_api = enviar_a_api_deteccion(nombre_archivo, api_url, api_key)
+        resultado_api = enviar_a_faceplusplus(nombre_archivo, api_url, api_key, api_secret)
 
-            if resultado_api:
-                procesar_respuesta(resultado_api)
+        if resultado_api:
+            procesar_respuesta(resultado_api)
     else:
         print("No se pudo continuar.")
 ```
