@@ -62,8 +62,8 @@ if __name__ == "__main__":
         print(f"Foto guardada como {nombre_archivo}")
 
         # *** Aquí debes configurar la URL de la API y la clave de API (si es necesaria) ***
-        api_url = "https://api-us.faceplusplus.com/facepp/v3/detect"
-        api_key = "tzytBaz06WTwv97ujkCYNHPFxE8K"
+        api_url = "apiurl"
+        api_key = "apikey"
 
         if api_url:
             resultado_api = enviar_a_api_deteccion(nombre_archivo, api_url, api_key)
